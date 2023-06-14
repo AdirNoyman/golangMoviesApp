@@ -15,8 +15,13 @@ func (app *application) routes() http.Handler {
 	// Will throw an http 500 error if our will panics and will log the error with backtrace and brings the application back up
 	mux.Use(middleware.Recoverer)
 
+	// Enable CORS
+	mux.Use(app.enableCORS)
+
 	// routes
 	mux.Get("/", app.Home)
+
+	mux.Get("/movies", app.AllMovies)
 
 	return mux
 }
