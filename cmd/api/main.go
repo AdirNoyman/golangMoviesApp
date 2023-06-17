@@ -1,6 +1,8 @@
 package main
 
 import (
+	"database/sql"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,7 +11,9 @@ import (
 const port = 8080
 
 type application struct {
-	Domain string
+	DataSrcName string
+	Domain      string
+	DB          *sql.DB
 }
 
 func main() {
@@ -18,15 +22,25 @@ func main() {
 	var app application
 
 	// read from command line arguments
+	// 'flag' package is used to parse command line arguments. it reads arguments(flags) from the command line
+	flag.StringVar(&app.DataSrcName, "dsn", "host=localhost port=5432 dbname=movies user=postgres password=postgres sslmode=disable timezone=UTC connect_timeout=5", "Postgres connection string")
+	flag.Parse()
 
 	// connect to the database
+	connDB, err := app.connectToDB()
+	if err != nil {
+
+		log.Fatalf("Failed to connect to database: %v, application was kiiled in action 💐😢", err)
+	}
+
+	app.DB = connDB
 
 	app.Domain = "example.com"
 
 	log.Println("Starting application on port:", port)
 
 	// start a web server
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
+	err = http.ListenAndServe(fmt.Sprintf(":%d", port), app.routes())
 
 	if err != nil {
 		log.Fatal(err)
