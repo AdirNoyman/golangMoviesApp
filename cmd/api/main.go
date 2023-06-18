@@ -27,13 +27,15 @@ func main() {
 	flag.Parse()
 
 	// connect to the database
-	connDB, err := app.connectToDB()
+	connectionPool, err := app.connectToDB()
 	if err != nil {
 
 		log.Fatalf("Failed to connect to database: %v, application was kiiled in action 💐😢", err)
 	}
 
-	app.DB = connDB
+	app.DB = connectionPool
+	// Close all connections in the pool, after the program exits 💪
+	defer app.DB.Close()
 
 	app.Domain = "example.com"
 
